@@ -1,6 +1,5 @@
 import { format } from 'date-fns';
 import { Pencil, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { ExamState } from '@/types/exam';
 import { Button } from '@/components/ui/button';
 
@@ -15,16 +14,19 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
   const getPhaseBar = () => {
     if (exam.currentPhase === 'perusal') {
       const totalSeconds = exam.perusalMinutes * 60;
-      const remainingPercent = (exam.perusalRemaining / totalSeconds) * 100;
+      const elapsedSeconds = totalSeconds - exam.perusalRemaining;
+      const elapsedPercent = (elapsedSeconds / totalSeconds) * 100;
+      const remainingMinutes = Math.ceil(exam.perusalRemaining / 60);
+      
       return (
         <div className="w-full">
           <div className="bg-timer-safe text-primary-foreground text-center py-2 font-semibold text-lg">
-            PERUSAL {exam.perusalMinutes} mins
+            PERUSAL {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
-          <div className="h-2 bg-muted">
+          <div className="h-2 bg-muted relative">
             <div 
-              className="h-full bg-timer-safe transition-all duration-1000"
-              style={{ width: `${remainingPercent}%` }}
+              className="h-full bg-timer-safe transition-all duration-1000 absolute right-0"
+              style={{ width: `${elapsedPercent}%` }}
             />
           </div>
         </div>
@@ -33,16 +35,19 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
     
     if (exam.currentPhase === 'planning') {
       const totalSeconds = exam.planningMinutes * 60;
-      const remainingPercent = (exam.planningRemaining / totalSeconds) * 100;
+      const elapsedSeconds = totalSeconds - exam.planningRemaining;
+      const elapsedPercent = (elapsedSeconds / totalSeconds) * 100;
+      const remainingMinutes = Math.ceil(exam.planningRemaining / 60);
+      
       return (
         <div className="w-full">
           <div className="bg-purple-400 text-primary-foreground text-center py-2 font-semibold text-lg">
-            PLANNING {exam.planningMinutes} mins
+            PLANNING {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
-          <div className="h-2 bg-muted">
+          <div className="h-2 bg-muted relative">
             <div 
-              className="h-full bg-purple-400 transition-all duration-1000"
-              style={{ width: `${remainingPercent}%` }}
+              className="h-full bg-purple-400 transition-all duration-1000 absolute right-0"
+              style={{ width: `${elapsedPercent}%` }}
             />
           </div>
         </div>
@@ -50,10 +55,20 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
     }
 
     if (exam.currentPhase === 'warning') {
+      const remainingMinutes = Math.ceil(exam.workingRemaining / 60);
+      const elapsedSeconds = 600 - exam.workingRemaining;
+      const elapsedPercent = (elapsedSeconds / 600) * 100;
+      
       return (
         <div className="w-full">
           <div className="bg-timer-warning text-primary-foreground text-center py-2 font-semibold text-lg animate-pulse">
-            10 MINUTES REMAINING
+            {remainingMinutes} MINUTE{remainingMinutes !== 1 ? 'S' : ''} REMAINING
+          </div>
+          <div className="h-2 bg-muted relative">
+            <div 
+              className="h-full bg-timer-warning transition-all duration-1000 absolute right-0"
+              style={{ width: `${elapsedPercent}%` }}
+            />
           </div>
         </div>
       );
