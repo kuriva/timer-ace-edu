@@ -1,63 +1,43 @@
-import { GraduationCap } from 'lucide-react';
-import { useTimer } from '@/hooks/useTimer';
-import { TimerDisplay } from '@/components/TimerDisplay';
-import { TimerControls } from '@/components/TimerControls';
-import { DurationSelector } from '@/components/DurationSelector';
-import { ProgressBar } from '@/components/ProgressBar';
+import { useExamTimer } from '@/hooks/useExamTimer';
+import { CurrentTimeDisplay } from '@/components/CurrentTimeDisplay';
+import { ExamList } from '@/components/ExamList';
+import { ExamControls } from '@/components/ExamControls';
 
 const Index = () => {
-  const timer = useTimer({
-    initialMinutes: 60,
-    warningThresholdMinutes: 10,
-    dangerThresholdMinutes: 5,
-  });
+  const {
+    exams,
+    currentTime,
+    isAnyRunning,
+    addExam,
+    updateExam,
+    removeExam,
+    startAllExams,
+    resetAllExams,
+  } = useExamTimer();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-center gap-3 py-6 border-b border-border/50">
-        <GraduationCap className="w-8 h-8 text-primary" />
-        <h1 className="text-2xl font-semibold tracking-tight">Exam Timer</h1>
-      </header>
+      {/* Current Time Header */}
+      <CurrentTimeDisplay currentTime={currentTime} />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 gap-10 animate-fade-in">
-        {/* Timer Display */}
-        <TimerDisplay
-          formattedTime={timer.formattedTime}
-          state={timer.state}
-          urgency={timer.urgency}
-        />
-
-        {/* Progress Bar */}
-        <ProgressBar
-          progress={timer.progress}
-          state={timer.state}
-          urgency={timer.urgency}
+      <main className="flex-1 py-6 animate-fade-in">
+        <ExamList
+          exams={exams}
+          isAnyRunning={isAnyRunning}
+          onAddExam={addExam}
+          onUpdateExam={updateExam}
+          onRemoveExam={removeExam}
         />
 
         {/* Controls */}
-        <TimerControls
-          state={timer.state}
-          onStart={timer.start}
-          onPause={timer.pause}
-          onReset={timer.reset}
+        <ExamControls
+          isAnyRunning={isAnyRunning}
+          hasExams={exams.length > 0}
+          onStart={startAllExams}
+          onReset={resetAllExams}
         />
-
-        {/* Duration Selector */}
-        <div className="w-full max-w-xl">
-          <DurationSelector
-            state={timer.state}
-            onSetDuration={timer.setDuration}
-            currentMinutes={Math.floor(timer.totalTime / 60)}
-          />
-        </div>
       </main>
-
-      {/* Footer */}
-      <footer className="py-4 text-center text-sm text-muted-foreground border-t border-border/50">
-        Keep focused. Good luck on your exam!
-      </footer>
     </div>
   );
 };
