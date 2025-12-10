@@ -57,6 +57,7 @@ export default {
           warning: "hsl(var(--timer-warning))",
           danger: "hsl(var(--timer-danger))",
         },
+        navy: "hsl(var(--navy))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
