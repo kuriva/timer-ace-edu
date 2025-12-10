@@ -23,9 +23,9 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
           <div className="bg-timer-safe text-primary-foreground text-center py-2 font-semibold text-lg">
             PERUSAL {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
-          <div className="h-2 bg-muted relative">
+          <div className="h-2 bg-muted">
             <div 
-              className="h-full bg-timer-safe transition-all duration-1000 absolute right-0"
+              className="h-full bg-timer-safe transition-all duration-1000"
               style={{ width: `${elapsedPercent}%` }}
             />
           </div>
@@ -44,9 +44,9 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
           <div className="bg-purple-400 text-primary-foreground text-center py-2 font-semibold text-lg">
             PLANNING {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
-          <div className="h-2 bg-muted relative">
+          <div className="h-2 bg-muted">
             <div 
-              className="h-full bg-purple-400 transition-all duration-1000 absolute right-0"
+              className="h-full bg-purple-400 transition-all duration-1000"
               style={{ width: `${elapsedPercent}%` }}
             />
           </div>
@@ -64,9 +64,9 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
           <div className="bg-timer-warning text-primary-foreground text-center py-2 font-semibold text-lg animate-pulse">
             {remainingMinutes} MINUTE{remainingMinutes !== 1 ? 'S' : ''} REMAINING
           </div>
-          <div className="h-2 bg-muted relative">
+          <div className="h-2 bg-muted">
             <div 
-              className="h-full bg-timer-warning transition-all duration-1000 absolute right-0"
+              className="h-full bg-timer-warning transition-all duration-1000"
               style={{ width: `${elapsedPercent}%` }}
             />
           </div>

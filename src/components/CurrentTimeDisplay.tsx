@@ -10,12 +10,12 @@ export function CurrentTimeDisplay({ currentTime }: CurrentTimeDisplayProps) {
   const time = format(currentTime, 'h:mm a');
 
   return (
-    <div className="flex items-center justify-between w-full px-4 py-6 bg-muted/30">
+    <div className="flex items-center justify-between w-full px-4 py-6">
       <div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground">{dayName}</h1>
         <p className="text-xl md:text-2xl text-foreground">{monthDay}</p>
       </div>
-      <div className="text-5xl md:text-7xl font-bold text-primary font-mono">
+      <div className="text-6xl md:text-8xl font-bold text-navy font-mono">
         {time}
       </div>
     </div>
