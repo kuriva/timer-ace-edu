@@ -1,0 +1,16 @@
+{
+  "name": "Exam Timer",
+  "short_name": "Exam Timer",
+  "description": "A timer application for exam halls",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2C5AA0",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

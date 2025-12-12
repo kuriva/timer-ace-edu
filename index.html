@@ -6,6 +6,8 @@
     <title>Exam Timer - Student Countdown Timer</title>
     <meta name="description" content="Professional exam timer for students. Set custom durations, track progress, and stay focused during exams with visual warnings." />
     <meta name="author" content="Lovable" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2C5AA0" />
 
     <meta property="og:title" content="Exam Timer - Student Countdown Timer" />
     <meta property="og:description" content="Professional exam timer for students with customizable durations and visual warnings." />
@@ -20,5 +22,18 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered:', registration.scope);
+            })
+            .catch((error) => {
+              console.log('SW registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

@@ -20,7 +20,7 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
       
       return (
         <div className="w-full">
-          <div className="bg-timer-safe text-primary-foreground text-center py-2 font-semibold text-lg">
+          <div className="bg-timer-safe text-foreground text-center py-3 font-bold text-2xl md:text-3xl">
             PERUSAL {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
           <div className="h-2 bg-muted">
@@ -41,7 +41,7 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
       
       return (
         <div className="w-full">
-          <div className="bg-purple-400 text-primary-foreground text-center py-2 font-semibold text-lg">
+          <div className="bg-purple-400 text-foreground text-center py-3 font-bold text-2xl md:text-3xl">
             PLANNING {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
           <div className="h-2 bg-muted">
@@ -61,7 +61,7 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
       
       return (
         <div className="w-full">
-          <div className="bg-timer-warning text-primary-foreground text-center py-2 font-semibold text-lg animate-pulse">
+          <div className="bg-timer-warning text-foreground text-center py-3 font-bold text-2xl md:text-3xl animate-pulse">
             {remainingMinutes} MINUTE{remainingMinutes !== 1 ? 'S' : ''} REMAINING
           </div>
           <div className="h-2 bg-muted">
