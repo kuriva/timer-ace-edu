@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Timer - Student Countdown Timer</title>
+  <meta name="description" content="Professional exam timer for students. Set custom durations, track progress, and stay focused during exams with visual warnings.">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --background: #ffffff;
+      --foreground: #0a0a0a;
+      --primary: #2C5AA0;
+      --primary-foreground: #ffffff;
+      --muted: #f5f5f5;
+      --muted-foreground: #737373;
+      --border: #e5e5e5;
+      --destructive: #ef4444;
+      --timer-safe: #22c55e;
+      --timer-warning: #f59e0b;
+      --timer-danger: #ef4444;
+      --purple: #c084fc;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .current-time {
+      font-size: 3rem;
+      font-weight: bold;
+      color: var(--primary);
+      font-family: 'Courier New', monospace;
+    }
+
+    .current-date {
+      font-size: 1.25rem;
+      color: var(--foreground);
+      margin-top: 0.5rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--foreground);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--muted);
+    }
+
+    .btn-destructive {
+      background-color: var(--destructive);
+      color: white;
+    }
+
+    .btn-icon {
+      padding: 0.5rem;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .exam-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .exam-card {
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background: var(--background);
+    }
+
+    .exam-card-content {
+      display: flex;
+    }
+
+    .exam-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-right: 1px solid var(--border);
+      justify-content: center;
+    }
+
+    .exam-main {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .exam-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      min-width: 200px;
+    }
+
+    .exam-timer {
+      font-size: 3rem;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+      min-width: 200px;
+    }
+
+    .exam-times {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+
+    .phase-bar {
+      text-align: center;
+      padding: 0.75rem;
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: var(--foreground);
+    }
+
+    .phase-bar.perusal {
+      background-color: var(--timer-safe);
+    }
+
+    .phase-bar.planning {
+      background-color: var(--purple);
+    }
+
+    .phase-bar.warning {
+      background-color: var(--timer-warning);
+      animation: pulse 2s infinite;
+    }
+
+    .phase-bar.finished {
+      background-color: var(--timer-danger);
+      color: white;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .progress-container {
+      height: 0.75rem;
+      background-color: var(--muted);
+    }
+
+    .progress-bar {
+      height: 100%;
+      transition: width 1s linear;
+    }
+
+    .progress-bar.safe {
+      background-color: var(--timer-safe);
+    }
+
+    .progress-bar.warning {
+      background-color: var(--timer-warning);
+    }
+
+    .progress-bar.danger {
+      background-color: var(--timer-danger);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--background);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      background: var(--background);
+    }
+
+    .duration-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .duration-btn {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: var(--background);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .duration-btn:hover, .duration-btn.active {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    /* Fullscreen Styles */
+    .fullscreen-view {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--background);
+      z-index: 200;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .fullscreen-view.active {
+      display: block;
+    }
+
+    .fullscreen-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .fullscreen-time {
+      font-size: 5rem;
+      font-weight: bold;
+      color: var(--primary);
+      font-family: 'Courier New', monospace;
+    }
+
+    .fullscreen-date {
+      font-size: 2rem;
+      color: var(--foreground);
+    }
+
+    .fullscreen-exit {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+    }
+
+    .fullscreen-exams {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .fullscreen-exam-card {
+      border: 2px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .fullscreen-exam-content {
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    .fullscreen-exam-name {
+      font-size: 2rem;
+      font-weight: bold;
+      min-width: 300px;
+    }
+
+    .fullscreen-exam-timer {
+      font-size: 5rem;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+
+    .fullscreen-exam-times {
+      font-size: 1.25rem;
+      color: var(--muted-foreground);
+    }
+
+    .fullscreen-phase-bar {
+      font-size: 2rem;
+      padding: 1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted-foreground);
+    }
+
+    .timer-finished {
+      color: var(--timer-danger);
+    }
+
+    @media (max-width: 768px) {
+      .exam-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .exam-timer {
+        font-size: 2rem;
+      }
+
+      .current-time {
+        font-size: 2rem;
+      }
+
+      .fullscreen-time {
+        font-size: 3rem;
+      }
+
+      .fullscreen-exam-timer {
+        font-size: 3rem;
+      }
+
+      .fullscreen-exam-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="mainView">
+    <header class="header">
+      <div class="current-time" id="currentTime">00:00:00</div>
+      <div class="current-date" id="currentDate">Monday, 1 January 2024</div>
+    </header>
+
+    <div class="controls" id="controls">
+      <button class="btn btn-primary" id="addExamBtn">+ Add Exam</button>
+    </div>
+
+    <div class="exam-list" id="examList">
+      <div class="empty-state">No exams added. Click "Add Exam" to get started.</div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Exam Modal -->
+  <div class="modal-overlay" id="examModal">
+    <div class="modal">
+      <div class="modal-header" id="modalTitle">Add New Exam</div>
+      
+      <div class="form-group">
+        <label class="form-label">Exam Name</label>
+        <input type="text" class="form-input" id="examName" placeholder="Enter exam name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Exam Duration</label>
+        <div class="duration-grid" id="durationGrid">
+          <button class="duration-btn" data-duration="60">1 hour</button>
+          <button class="duration-btn" data-duration="65">1h 5m</button>
+          <button class="duration-btn" data-duration="70">1h 10m</button>
+          <button class="duration-btn" data-duration="75">1h 15m</button>
+          <button class="duration-btn" data-duration="80">1h 20m</button>
+          <button class="duration-btn" data-duration="85">1h 25m</button>
+          <button class="duration-btn" data-duration="90">1h 30m</button>
+          <button class="duration-btn" data-duration="95">1h 35m</button>
+          <button class="duration-btn" data-duration="100">1h 40m</button>
+          <button class="duration-btn" data-duration="105">1h 45m</button>
+          <button class="duration-btn" data-duration="110">1h 50m</button>
+          <button class="duration-btn" data-duration="115">1h 55m</button>
+          <button class="duration-btn" data-duration="120">2 hours</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Perusal/Planning Time</label>
+        <select class="form-select" id="prepTimeType">
+          <option value="perusal">Perusal Time</option>
+          <option value="planning">Planning Time</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="prepDurationGroup">
+        <label class="form-label">Duration (minutes)</label>
+        <div class="duration-grid" id="prepDurationGrid">
+          <button class="duration-btn" data-prep="5">5 min</button>
+          <button class="duration-btn" data-prep="10">10 min</button>
+          <button class="duration-btn" data-prep="15">15 min</button>
+          <button class="duration-btn" data-prep="20">20 min</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="cancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveExamBtn">Save Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen View -->
+  <div class="fullscreen-view" id="fullscreenView">
+    <button class="btn btn-outline fullscreen-exit" id="exitFullscreen">Exit Fullscreen</button>
+    <header class="fullscreen-header">
+      <div class="fullscreen-date" id="fullscreenDate">Monday, 1 January 2024</div>
+      <div class="fullscreen-time" id="fullscreenTime">00:00:00</div>
+    </header>
+    <div class="fullscreen-exams" id="fullscreenExams"></div>
+  </div>
+
+  <script>
+    // State
+    let exams = [];
+    let isAnyRunning = false;
+    let editingExamId = null;
+    let selectedDuration = 60;
+    let selectedPrepDuration = 10;
+
+    // DOM Elements
+    const currentTimeEl = document.getElementById('currentTime');
+    const currentDateEl = document.getElementById('currentDate');
+    const examListEl = document.getElementById('examList');
+    const controlsEl = document.getElementById('controls');
+    const examModal = document.getElementById('examModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const examNameInput = document.getElementById('examName');
+    const prepTimeType = document.getElementById('prepTimeType');
+    const prepDurationGroup = document.getElementById('prepDurationGroup');
+    const fullscreenView = document.getElementById('fullscreenView');
+    const fullscreenTime = document.getElementById('fullscreenTime');
+    const fullscreenDate = document.getElementById('fullscreenDate');
+    const fullscreenExams = document.getElementById('fullscreenExams');
+
+    // Utility functions
+    function generateId() {
+      return Math.random().toString(36).substr(2, 9);
+    }
+
+    function formatTime(seconds) {
+      if (seconds <= 0) return '00:00:00';
+      const hrs = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function formatTimeShort(date) {
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function formatDuration(minutes) {
+      const hrs = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      if (hrs === 0) return `${mins}m`;
+      if (mins === 0) return `${hrs}h`;
+      return `${hrs}h ${mins}m`;
+    }
+
+    // Update current time
+    function updateCurrentTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      currentTimeEl.textContent = timeStr;
+      currentDateEl.textContent = formatDate(now);
+      fullscreenTime.textContent = timeStr;
+      fullscreenDate.textContent = formatDate(now);
+    }
+
+    // Calculate exam phase and remaining time
+    function getExamState(exam) {
+      if (!exam.isRunning) {
+        return {
+          phase: 'idle',
+          remainingTime: exam.durationMinutes * 60,
+          phaseRemainingTime: 0,
+          progress: 0
+        };
+      }
+
+      const now = Date.now();
+      const elapsed = Math.floor((now - exam.startTime) / 1000);
+      
+      const perusalSeconds = (exam.perusalMinutes || 0) * 60;
+      const planningSeconds = (exam.planningMinutes || 0) * 60;
+      const workingSeconds = exam.durationMinutes * 60;
+      const totalSeconds = perusalSeconds + planningSeconds + workingSeconds;
+
+      if (elapsed < perusalSeconds) {
+        return {
+          phase: 'perusal',
+          remainingTime: workingSeconds,
+          phaseRemainingTime: perusalSeconds - elapsed,
+          progress: elapsed / perusalSeconds * 100
+        };
+      }
+
+      if (elapsed < perusalSeconds + planningSeconds) {
+        const planningElapsed = elapsed - perusalSeconds;
+        return {
+          phase: 'planning',
+          remainingTime: workingSeconds,
+          phaseRemainingTime: planningSeconds - planningElapsed,
+          progress: planningElapsed / planningSeconds * 100
+        };
+      }
+
+      const workingElapsed = elapsed - perusalSeconds - planningSeconds;
+      const workingRemaining = workingSeconds - workingElapsed;
+
+      if (workingRemaining <= 0) {
+        return {
+          phase: 'finished',
+          remainingTime: 0,
+          phaseRemainingTime: 0,
+          progress: 100
+        };
+      }
+
+      if (workingRemaining <= 600) { // 10 minutes
+        return {
+          phase: 'warning',
+          remainingTime: workingRemaining,
+          phaseRemainingTime: workingRemaining,
+          progress: workingElapsed / workingSeconds * 100
+        };
+      }
+
+      return {
+        phase: 'working',
+        remainingTime: workingRemaining,
+        phaseRemainingTime: workingRemaining,
+        progress: workingElapsed / workingSeconds * 100
+      };
+    }
+
+    // Render exam card
+    function renderExamCard(exam) {
+      const state = getExamState(exam);
+      const card = document.createElement('div');
+      card.className = 'exam-card';
+      card.dataset.id = exam.id;
+
+      let phaseBar = '';
+      if (state.phase === 'perusal') {
+        const mins = Math.ceil(state.phaseRemainingTime / 60);
+        phaseBar = `
+          <div class="phase-bar perusal">PERUSAL ${mins} min${mins !== 1 ? 's' : ''}</div>
+          <div class="progress-container"><div class="progress-bar safe" style="width: ${state.progress}%"></div></div>
+        `;
+      } else if (state.phase === 'planning') {
+        const mins = Math.ceil(state.phaseRemainingTime / 60);
+        phaseBar = `
+          <div class="phase-bar planning">PLANNING ${mins} min${mins !== 1 ? 's' : ''}</div>
+          <div class="progress-container"><div class="progress-bar safe" style="width: ${state.progress}%"></div></div>
+        `;
+      } else if (state.phase === 'warning') {
+        const mins = Math.ceil(state.phaseRemainingTime / 60);
+        phaseBar = `
+          <div class="phase-bar warning">${mins} MINUTE${mins !== 1 ? 'S' : ''} REMAINING</div>
+          <div class="progress-container"><div class="progress-bar warning" style="width: ${state.progress}%"></div></div>
+        `;
+      } else if (state.phase === 'finished') {
+        phaseBar = `
+          <div class="phase-bar finished">EXAM FINISHED</div>
+          <div class="progress-container"><div class="progress-bar danger" style="width: 100%"></div></div>
+        `;
+      } else if (state.phase === 'working') {
+        phaseBar = `
+          <div class="progress-container"><div class="progress-bar safe" style="width: ${state.progress}%"></div></div>
+        `;
+      }
+
+      const timerClass = state.phase === 'finished' ? 'timer-finished' : '';
+      const actionsHtml = !exam.isRunning ? `
+        <div class="exam-actions">
+          <button class="btn btn-icon btn-outline edit-btn" data-id="${exam.id}">✏️</button>
+          <button class="btn btn-icon btn-outline delete-btn" data-id="${exam.id}">🗑️</button>
+        </div>
+      ` : '<div class="exam-actions" style="width: 60px;"></div>';
+
+      card.innerHTML = `
+        <div class="exam-card-content">
+          ${actionsHtml}
+          <div class="exam-main">
+            <div class="exam-name">${exam.name}</div>
+            <div class="exam-timer ${timerClass}">${formatTime(state.remainingTime)}</div>
+            <div class="exam-times">
+              ${exam.startTime ? `<div>Started: ${formatTimeShort(new Date(exam.startTime))}</div>` : ''}
+              ${exam.finishTime ? `<div>Finishes: ${formatTimeShort(new Date(exam.finishTime))}</div>` : ''}
+              <div>Duration: ${formatDuration(exam.durationMinutes)}${exam.perusalMinutes ? ` + ${exam.perusalMinutes}m perusal` : ''}${exam.planningMinutes ? ` + ${exam.planningMinutes}m planning` : ''}</div>
+            </div>
+          </div>
+        </div>
+        ${phaseBar}
+      `;
+
+      return card;
+    }
+
+    // Render fullscreen exam card
+    function renderFullscreenExamCard(exam) {
+      const state = getExamState(exam);
+      const card = document.createElement('div');
+      card.className = 'fullscreen-exam-card';
+
+      let phaseBar = '';
+      if (state.phase === 'perusal') {
+        const mins = Math.ceil(state.phaseRemainingTime / 60);
+        phaseBar = `
+          <div class="phase-bar fullscreen-phase-bar perusal">PERUSAL ${mins} min${mins !== 1 ? 's' : ''}</div>
+          <div class="progress-container"><div class="progress-bar safe" style="width: ${state.progress}%"></div></div>
+        `;
+      } else if (state.phase === 'planning') {
+        const mins = Math.ceil(state.phaseRemainingTime / 60);
+        phaseBar = `
+          <div class="phase-bar fullscreen-phase-bar planning">PLANNING ${mins} min${mins !== 1 ? 's' : ''}</div>
+          <div class="progress-container"><div class="progress-bar safe" style="width: ${state.progress}%"></div></div>
+        `;
+      } else if (state.phase === 'warning') {
+        const mins = Math.ceil(state.phaseRemainingTime / 60);
+        phaseBar = `
+          <div class="phase-bar fullscreen-phase-bar warning">${mins} MINUTE${mins !== 1 ? 'S' : ''} REMAINING</div>
+          <div class="progress-container"><div class="progress-bar warning" style="width: ${state.progress}%"></div></div>
+        `;
+      } else if (state.phase === 'finished') {
+        phaseBar = `
+          <div class="phase-bar fullscreen-phase-bar finished">EXAM FINISHED</div>
+          <div class="progress-container"><div class="progress-bar danger" style="width: 100%"></div></div>
+        `;
+      } else if (state.phase === 'working') {
+        phaseBar = `
+          <div class="progress-container"><div class="progress-bar safe" style="width: ${state.progress}%"></div></div>
+        `;
+      }
+
+      const timerClass = state.phase === 'finished' ? 'timer-finished' : '';
+
+      card.innerHTML = `
+        <div class="fullscreen-exam-content">
+          <div class="fullscreen-exam-name">${exam.name}</div>
+          <div class="fullscreen-exam-timer ${timerClass}">${formatTime(state.remainingTime)}</div>
+          <div class="fullscreen-exam-times">
+            ${exam.startTime ? `Started: ${formatTimeShort(new Date(exam.startTime))}` : ''}
+            ${exam.finishTime ? ` | Finishes: ${formatTimeShort(new Date(exam.finishTime))}` : ''}
+          </div>
+        </div>
+        ${phaseBar}
+      `;
+
+      return card;
+    }
+
+    // Sort exams by finish time
+    function sortExams() {
+      exams.sort((a, b) => {
+        if (!a.isRunning && !b.isRunning) return 0;
+        if (!a.isRunning) return 1;
+        if (!b.isRunning) return -1;
+        return (a.finishTime || 0) - (b.finishTime || 0);
+      });
+    }
+
+    // Render all exams
+    function renderExams() {
+      sortExams();
+      examListEl.innerHTML = '';
+      
+      if (exams.length === 0) {
+        examListEl.innerHTML = '<div class="empty-state">No exams added. Click "Add Exam" to get started.</div>';
+        return;
+      }
+
+      exams.forEach(exam => {
+        examListEl.appendChild(renderExamCard(exam));
+      });
+
+      // Add event listeners for edit/delete buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteExam(btn.dataset.id));
+      });
+    }
+
+    // Render fullscreen exams
+    function renderFullscreenExams() {
+      sortExams();
+      fullscreenExams.innerHTML = '';
+      exams.forEach(exam => {
+        fullscreenExams.appendChild(renderFullscreenExamCard(exam));
+      });
+    }
+
+    // Render controls
+    function renderControls() {
+      isAnyRunning = exams.some(e => e.isRunning);
+      
+      let html = '<button class="btn btn-primary" id="addExamBtn">+ Add Exam</button>';
+      
+      if (exams.length > 0) {
+        if (!isAnyRunning) {
+          html += '<button class="btn btn-primary" id="startAllBtn">▶ Start All</button>';
+        } else {
+          html += '<button class="btn btn-outline" id="fullscreenBtn">⛶ Fullscreen</button>';
+        }
+        html += '<button class="btn btn-destructive" id="resetAllBtn">↺ Reset All</button>';
+      }
+
+      controlsEl.innerHTML = html;
+
+      // Add event listeners
+      document.getElementById('addExamBtn').addEventListener('click', openAddModal);
+      
+      const startAllBtn = document.getElementById('startAllBtn');
+      if (startAllBtn) startAllBtn.addEventListener('click', startAllExams);
+      
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      if (fullscreenBtn) fullscreenBtn.addEventListener('click', enterFullscreen);
+      
+      const resetAllBtn = document.getElementById('resetAllBtn');
+      if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllExams);
+    }
+
+    // Modal functions
+    function openAddModal() {
+      editingExamId = null;
+      modalTitle.textContent = 'Add New Exam';
+      examNameInput.value = '';
+      selectedDuration = 60;
+      selectedPrepDuration = 10;
+      prepTimeType.value = 'perusal';
+      prepDurationGroup.style.display = 'block';
+      updateDurationButtons();
+      updatePrepDurationButtons();
+      examModal.classList.add('active');
+    }
+
+    function openEditModal(id) {
+      const exam = exams.find(e => e.id === id);
+      if (!exam) return;
+
+      editingExamId = id;
+      modalTitle.textContent = 'Edit Exam';
+      examNameInput.value = exam.name;
+      selectedDuration = exam.durationMinutes;
+      
+      if (exam.perusalMinutes) {
+        prepTimeType.value = 'perusal';
+        selectedPrepDuration = exam.perusalMinutes;
+      } else if (exam.planningMinutes) {
+        prepTimeType.value = 'planning';
+        selectedPrepDuration = exam.planningMinutes;
+      } else {
+        prepTimeType.value = 'none';
+        selectedPrepDuration = 10;
+      }
+
+      prepDurationGroup.style.display = prepTimeType.value !== 'none' ? 'block' : 'none';
+      updateDurationButtons();
+      updatePrepDurationButtons();
+      examModal.classList.add('active');
+    }
+
+    function closeModal() {
+      examModal.classList.remove('active');
+      editingExamId = null;
+    }
+
+    function updateDurationButtons() {
+      document.querySelectorAll('#durationGrid .duration-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.duration) === selectedDuration);
+      });
+    }
+
+    function updatePrepDurationButtons() {
+      document.querySelectorAll('#prepDurationGrid .duration-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.prep) === selectedPrepDuration);
+      });
+    }
+
+    function saveExam() {
+      const name = examNameInput.value.trim() || 'Untitled Exam';
+      const prepType = prepTimeType.value;
+
+      const examData = {
+        name,
+        durationMinutes: selectedDuration,
+        perusalMinutes: prepType === 'perusal' ? selectedPrepDuration : 0,
+        planningMinutes: prepType === 'planning' ? selectedPrepDuration : 0,
+        isRunning: false,
+        startTime: null,
+        finishTime: null
+      };
+
+      if (editingExamId) {
+        const index = exams.findIndex(e => e.id === editingExamId);
+        if (index !== -1) {
+          exams[index] = { ...exams[index], ...examData };
+        }
+      } else {
+        exams.push({ id: generateId(), ...examData });
+      }
+
+      closeModal();
+      renderExams();
+      renderControls();
+      saveToLocalStorage();
+    }
+
+    function deleteExam(id) {
+      exams = exams.filter(e => e.id !== id);
+      renderExams();
+      renderControls();
+      saveToLocalStorage();
+    }
+
+    // Exam control functions
+    function startAllExams() {
+      const now = Date.now();
+      exams = exams.map(exam => {
+        if (exam.isRunning) return exam;
+        
+        const totalMinutes = exam.durationMinutes + (exam.perusalMinutes || 0) + (exam.planningMinutes || 0);
+        const finishTime = now + totalMinutes * 60 * 1000;
+
+        return {
+          ...exam,
+          isRunning: true,
+          startTime: now,
+          finishTime
+        };
+      });
+
+      isAnyRunning = true;
+      renderExams();
+      renderControls();
+      saveToLocalStorage();
+    }
+
+    function resetAllExams() {
+      exams = exams.map(exam => ({
+        ...exam,
+        isRunning: false,
+        startTime: null,
+        finishTime: null
+      }));
+
+      isAnyRunning = false;
+      exitFullscreen();
+      renderExams();
+      renderControls();
+      saveToLocalStorage();
+    }
+
+    function enterFullscreen() {
+      fullscreenView.classList.add('active');
+      renderFullscreenExams();
+      
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      }
+    }
+
+    function exitFullscreen() {
+      fullscreenView.classList.remove('active');
+      
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+
+    // Local storage
+    function saveToLocalStorage() {
+      localStorage.setItem('examTimerExams', JSON.stringify(exams));
+    }
+
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem('examTimerExams');
+      if (saved) {
+        exams = JSON.parse(saved);
+        isAnyRunning = exams.some(e => e.isRunning);
+      }
+    }
+
+    // Event listeners
+    document.getElementById('cancelBtn').addEventListener('click', closeModal);
+    document.getElementById('saveExamBtn').addEventListener('click', saveExam);
+    document.getElementById('exitFullscreen').addEventListener('click', exitFullscreen);
+
+    prepTimeType.addEventListener('change', () => {
+      prepDurationGroup.style.display = prepTimeType.value !== 'none' ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('#durationGrid .duration-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedDuration = parseInt(btn.dataset.duration);
+        updateDurationButtons();
+      });
+    });
+
+    document.querySelectorAll('#prepDurationGrid .duration-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedPrepDuration = parseInt(btn.dataset.prep);
+        updatePrepDurationButtons();
+      });
+    });
+
+    // Handle ESC key to exit fullscreen
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        exitFullscreen();
+      }
+    });
+
+    // Handle browser fullscreen change
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        fullscreenView.classList.remove('active');
+      }
+    });
+
+    // Main update loop
+    function update() {
+      updateCurrentTime();
+      
+      if (isAnyRunning) {
+        renderExams();
+        if (fullscreenView.classList.contains('active')) {
+          renderFullscreenExams();
+        }
+      }
+    }
+
+    // Initialize
+    loadFromLocalStorage();
+    renderExams();
+    renderControls();
+    updateCurrentTime();
+
+    // Update every second
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>
