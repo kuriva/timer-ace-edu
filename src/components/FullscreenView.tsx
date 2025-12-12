@@ -23,7 +23,7 @@ export function FullscreenView({ exams, currentTime, onExit }: FullscreenViewPro
       
       return (
         <div className="w-full">
-          <div className="bg-timer-safe text-primary-foreground text-center py-3 font-semibold text-2xl">
+          <div className="bg-timer-safe text-foreground text-center py-3 font-bold text-2xl md:text-3xl">
             PERUSAL {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
           <div className="h-3 bg-muted">
@@ -44,7 +44,7 @@ export function FullscreenView({ exams, currentTime, onExit }: FullscreenViewPro
       
       return (
         <div className="w-full">
-          <div className="bg-purple-400 text-primary-foreground text-center py-3 font-semibold text-2xl">
+          <div className="bg-purple-400 text-foreground text-center py-3 font-bold text-2xl md:text-3xl">
             PLANNING {remainingMinutes} min{remainingMinutes !== 1 ? 's' : ''}
           </div>
           <div className="h-3 bg-muted">
@@ -64,7 +64,7 @@ export function FullscreenView({ exams, currentTime, onExit }: FullscreenViewPro
       
       return (
         <div className="w-full">
-          <div className="bg-timer-warning text-primary-foreground text-center py-3 font-semibold text-2xl animate-pulse">
+          <div className="bg-timer-warning text-foreground text-center py-3 font-bold text-2xl md:text-3xl animate-pulse">
             {remainingMinutes} MINUTE{remainingMinutes !== 1 ? 'S' : ''} REMAINING
           </div>
           <div className="h-3 bg-muted">

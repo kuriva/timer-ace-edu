@@ -85,7 +85,7 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
       <div className="flex items-stretch">
         {/* Edit button */}
         <div className="flex items-center justify-center px-2 border-r border-border">
-          {!isRunning ? (
+          {!isRunning && (
             <div className="flex flex-col gap-2">
               <Button variant="ghost" size="icon" onClick={onEdit} className="h-8 w-8">
                 <Pencil className="h-4 w-4 text-primary" />
@@ -93,10 +93,6 @@ export function ExamCard({ exam, onEdit, onRemove, isRunning }: ExamCardProps) {
               <Button variant="ghost" size="icon" onClick={onRemove} className="h-8 w-8">
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
-            </div>
-          ) : (
-            <div className="text-xs text-muted-foreground uppercase">
-              <Pencil className="h-4 w-4 text-muted-foreground/50" />
             </div>
           )}
         </div>
